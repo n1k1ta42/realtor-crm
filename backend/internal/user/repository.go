@@ -15,12 +15,12 @@ func NewRepositoryUser(database *db.Db) *RepositoryUser {
 	}
 }
 
-func (r *RepositoryUser) GetLinks(limit, offset int) ([]User, error) {
+func (r *RepositoryUser) GetUsers(limit, offset int) ([]User, error) {
 	var users []User
 	result := r.Database.DB.
 		Table("users").
 		Where("deleted_at IS NULL").
-		Order("id asc").
+		Order("id desc").
 		Limit(limit).
 		Offset(offset).
 		Scan(&users)
@@ -30,7 +30,7 @@ func (r *RepositoryUser) GetLinks(limit, offset int) ([]User, error) {
 	return users, nil
 }
 
-func (r *RepositoryUser) GetLinksCount() (int64, error) {
+func (r *RepositoryUser) GetUsersCount() (int64, error) {
 	var count int64
 	result := r.Database.DB.Table("users").
 		Table("users").

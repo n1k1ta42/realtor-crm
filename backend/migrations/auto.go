@@ -5,6 +5,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"os"
+	"realtor-crm-backend/internal/organization"
 	"realtor-crm-backend/internal/user"
 )
 
@@ -17,7 +18,7 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	err = db.AutoMigrate(&user.User{})
+	err = db.AutoMigrate(&user.User{}, &organization.Organization{})
 	if err != nil {
 		panic(err.Error())
 	}

@@ -20,13 +20,26 @@ func main() {
 	newDb := db.NewDb(conf)
 	// Repositories
 	userRepository := user.NewRepositoryUser(newDb)
+	organizationRepository := organization.NewRepositoryOrganization(newDb)
 	// Services
-	userService := user.NewServiceUser(userRepository)
 	authService := auth.NewServiceAuth(userRepository)
+	userService := user.NewServiceUser(userRepository)
+	organizationService := organization.NewServiceOrganization(organizationRepository)
 	// Handlers
-	auth.NewHandlerAuth(router, auth.HandlerAuthDeps{Config: conf, AuthService: authService})
-	user.NewHandlerUsers(router, user.HandlerUserDeps{UserRepository: userRepository, UserService: userService, Config: conf})
-	organization.NewHandlerOrganizations(router, organization.HandlerOrganizationDeps{})
+	auth.NewHandlerAuth(router, auth.HandlerAuthDeps{
+		Config:      conf,
+		AuthService: authService,
+	})
+	user.NewHandlerUsers(router, user.HandlerUserDeps{
+		UserRepository: userRepository,
+		UserService:    userService,
+		Config:         conf,
+	})
+	organization.NewHandlerOrganizations(router, organization.HandlerOrganizationDeps{
+		OrganizationRepository: organizationRepository,
+		OrganizationService:    organizationService,
+		Config:                 conf,
+	})
 	client.NewHandlerClients(router, client.HandlerClientDeps{})
 	object.NewHandlerObjects(router, object.HandlerObjectDeps{})
 	deal.NewHandlerDeals(router, deal.HandlerDealDeps{})

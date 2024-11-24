@@ -20,12 +20,12 @@ func NewServiceUser(userRepository *RepositoryUser) *ServiceUser {
 }
 
 func (s *ServiceUser) List(limit, offset int) (*ListUserResponse, error) {
-	users, err := s.UserRepository.GetLinks(limit, offset)
+	users, err := s.UserRepository.GetUsers(limit, offset)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, errors.New("something went wrong")
 	}
-	count, err := s.UserRepository.GetLinksCount()
+	count, err := s.UserRepository.GetUsersCount()
 	if err != nil {
 		log.Println(err.Error())
 		return nil, errors.New("something went wrong")
@@ -36,10 +36,15 @@ func (s *ServiceUser) List(limit, offset int) (*ListUserResponse, error) {
 	}, nil
 }
 
-func (s *ServiceUser) Create(name, surname, email string) (string, error) {
+func (s *ServiceUser) Create(name, surname, email, creatorEmail string) (string, error) {
 	existedUser, _ := s.UserRepository.ByEmail(email)
 	if existedUser != nil {
-		return "", errors.New("user already exists")
+		return "", errors.New("user with this email already exists")
+	}
+	creator, err := s.UserRepository.ByEmail(creatorEmail)
+	if err != nil {
+		log.Println(err.Error())
+		return "", errors.New("not found creator")
 	}
 	randomPassword, err := GenerateRandomPassword()
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(randomPassword), bcrypt.DefaultCost)
@@ -47,7 +52,7 @@ func (s *ServiceUser) Create(name, surname, email string) (string, error) {
 		log.Println(err.Error())
 		return "", errors.New("failed to create user")
 	}
-	user := NewUser(name, surname, email, string(hashedPassword))
+	user := NewUser(name, surname, email, string(hashedPassword), creator.OrganizationId)
 	_, err = s.UserRepository.Create(user)
 	if err != nil {
 		log.Println(err.Error())

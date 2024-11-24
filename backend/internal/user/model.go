@@ -6,17 +6,19 @@ import (
 
 type User struct {
 	gorm.Model
-	Name         string `json:"name"`
-	Surname      string `json:"surname"`
-	Email        string `json:"email" gorm:"uniqueIndex"`
-	PasswordHash string `json:"password_hash"`
+	OrganizationId uint   `json:"organization_id"`
+	Name           string `json:"name"`
+	Surname        string `json:"surname"`
+	Email          string `json:"email" gorm:"uniqueIndex"`
+	PasswordHash   string `json:"password_hash"`
 }
 
-func NewUser(name, surname, email, password string) *User {
+func NewUser(name, surname, email, password string, organizationsId uint) *User {
 	return &User{
-		Name:         name,
-		Surname:      surname,
-		Email:        email,
-		PasswordHash: password,
+		Name:           name,
+		Surname:        surname,
+		Email:          email,
+		PasswordHash:   password,
+		OrganizationId: organizationsId,
 	}
 }
