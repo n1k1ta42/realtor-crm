@@ -2,23 +2,29 @@ package user
 
 import (
 	"gorm.io/gorm"
+	"realtor-crm-backend/internal/client"
+	"realtor-crm-backend/internal/deal"
+	"realtor-crm-backend/internal/object"
 )
 
 type User struct {
 	gorm.Model
-	OrganizationId uint   `json:"organization_id"`
-	Name           string `json:"name"`
-	Surname        string `json:"surname"`
-	Email          string `json:"email" gorm:"uniqueIndex"`
-	PasswordHash   string `json:"password_hash"`
+	OrganizationId uint            `json:"organizationId"`
+	Name           string          `json:"name"`
+	Surname        string          `json:"surname"`
+	Email          string          `json:"email" gorm:"uniqueIndex"`
+	PasswordHash   string          `json:"passwordHash"`
+	Clients        []client.Client `json:"clients" gorm:"constraints:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Objects        []object.Object `json:"objects" gorm:"constraints:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Deals          []deal.Deal     `json:"deals" gorm:"constraints:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 func NewUser(name, surname, email, password string, organizationsId uint) *User {
 	return &User{
+		OrganizationId: organizationsId,
 		Name:           name,
 		Surname:        surname,
 		Email:          email,
 		PasswordHash:   password,
-		OrganizationId: organizationsId,
 	}
 }

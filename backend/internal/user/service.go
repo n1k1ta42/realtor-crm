@@ -36,12 +36,12 @@ func (s *ServiceUser) List(limit, offset int) (*ListUserResponse, error) {
 	}, nil
 }
 
-func (s *ServiceUser) Create(name, surname, email, creatorEmail string) (string, error) {
+func (s *ServiceUser) Create(name, surname, email string, creatorId uint) (string, error) {
 	existedUser, _ := s.UserRepository.ByEmail(email)
 	if existedUser != nil {
 		return "", errors.New("user with this email already exists")
 	}
-	creator, err := s.UserRepository.ByEmail(creatorEmail)
+	creator, err := s.UserRepository.ById(creatorId)
 	if err != nil {
 		log.Println(err.Error())
 		return "", errors.New("not found creator")

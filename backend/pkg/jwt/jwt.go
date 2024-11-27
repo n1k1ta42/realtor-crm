@@ -1,13 +1,17 @@
 package JWT
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"github.com/golang-jwt/jwt/v5"
+	"log"
+	"math"
+)
 
 type JWT struct {
 	Secret string
 }
 
 type DataJWT struct {
-	Email string
+	Id uint
 }
 
 func NewJWT(secret string) *JWT {
@@ -18,7 +22,7 @@ func NewJWT(secret string) *JWT {
 
 func (j *JWT) CreateToken(data DataJWT) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": data.Email,
+		"id": data.Id,
 	})
 	s, err := token.SignedString([]byte(j.Secret))
 	if err != nil {
@@ -34,6 +38,11 @@ func (j *JWT) VerifyToken(tokenString string) (bool, *DataJWT) {
 	if err != nil {
 		return false, nil
 	}
-	email := parse.Claims.(jwt.MapClaims)["email"].(string)
-	return parse.Valid, &DataJWT{Email: email}
+	id := parse.Claims.(jwt.MapClaims)["id"].(float64)
+	if id < 0 || id > math.MaxUint {
+		log.Println("float value out of uint range")
+		return false, nil
+	}
+	uintId := uint(id)
+	return parse.Valid, &DataJWT{Id: uintId}
 }

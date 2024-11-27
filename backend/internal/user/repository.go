@@ -18,12 +18,15 @@ func NewRepositoryUser(database *db.Db) *RepositoryUser {
 func (r *RepositoryUser) GetUsers(limit, offset int) ([]User, error) {
 	var users []User
 	result := r.Database.DB.
+		Preload("Clients").
+		Preload("Objects").
+		Preload("Deals").
 		Table("users").
 		Where("deleted_at IS NULL").
 		Order("id desc").
 		Limit(limit).
 		Offset(offset).
-		Scan(&users)
+		Find(&users)
 	if result.Error != nil {
 		return nil, result.Error
 	}

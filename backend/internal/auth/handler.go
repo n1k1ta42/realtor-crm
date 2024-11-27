@@ -32,12 +32,12 @@ func (h *HandlerAuth) Login() http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		email, err := h.AuthService.Login(body.Email, body.Password)
+		id, err := h.AuthService.Login(body.Email, body.Password)
 		if err != nil {
 			res.Json(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		token, err := JWT.NewJWT(h.Config.Auth.Secret).CreateToken(JWT.DataJWT{Email: email})
+		token, err := JWT.NewJWT(h.Config.Auth.Secret).CreateToken(JWT.DataJWT{Id: id})
 		if err != nil {
 			res.Json(w, http.StatusInternalServerError, "something went wrong")
 			return

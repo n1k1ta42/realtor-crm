@@ -74,12 +74,12 @@ func (h *HandlerUser) Create() http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		creatorEmail, ok := r.Context().Value(middleware.ContextEmailKey).(string)
+		creatorId, ok := r.Context().Value(middleware.ContextIdKey).(uint)
 		if !ok {
 			res.Json(w, http.StatusInternalServerError, "something went wrong")
 			return
 		}
-		createdPassword, err := h.UserService.Create(body.Name, body.Surname, body.Email, creatorEmail)
+		createdPassword, err := h.UserService.Create(body.Name, body.Surname, body.Email, creatorId)
 		if err != nil {
 			res.Json(w, http.StatusBadRequest, err.Error())
 			return

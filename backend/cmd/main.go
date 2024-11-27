@@ -21,10 +21,16 @@ func main() {
 	// Repositories
 	userRepository := user.NewRepositoryUser(newDb)
 	organizationRepository := organization.NewRepositoryOrganization(newDb)
+	clientRepository := client.NewRepositoryClient(newDb)
+	objectRepository := object.NewRepositoryObject(newDb)
+	dealRepository := deal.NewRepositoryDeal(newDb)
 	// Services
 	authService := auth.NewServiceAuth(userRepository)
 	userService := user.NewServiceUser(userRepository)
 	organizationService := organization.NewServiceOrganization(organizationRepository)
+	clientService := client.NewServiceClient(clientRepository)
+	objectService := object.NewServiceObject(objectRepository)
+	dealService := deal.NewServiceDeal(dealRepository)
 	// Handlers
 	auth.NewHandlerAuth(router, auth.HandlerAuthDeps{
 		Config:      conf,
@@ -40,9 +46,21 @@ func main() {
 		OrganizationService:    organizationService,
 		Config:                 conf,
 	})
-	client.NewHandlerClients(router, client.HandlerClientDeps{})
-	object.NewHandlerObjects(router, object.HandlerObjectDeps{})
-	deal.NewHandlerDeals(router, deal.HandlerDealDeps{})
+	client.NewHandlerClients(router, client.HandlerClientDeps{
+		ClientRepository: clientRepository,
+		ClientService:    clientService,
+		Config:           conf,
+	})
+	object.NewHandlerObjects(router, object.HandlerObjectDeps{
+		ObjectRepository: objectRepository,
+		ObjectService:    objectService,
+		Config:           conf,
+	})
+	deal.NewHandlerDeals(router, deal.HandlerDealDeps{
+		DealRepository: dealRepository,
+		DealService:    dealService,
+		Config:         conf,
+	})
 	// Middlewares
 	stack := middleware.Chain(
 		middleware.CORS,
