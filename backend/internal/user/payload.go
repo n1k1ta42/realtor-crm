@@ -9,7 +9,7 @@ type CreateUserRequest struct {
 type UpdateUserRequest struct {
 	Name    string `json:"name"`
 	Surname string `json:"surname"`
-	Email   string `json:"email" validate:"email"`
+	Email   string `json:"email" validate:"omitempty,email"`
 }
 
 type ListUserResponse struct {

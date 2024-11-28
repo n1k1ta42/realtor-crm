@@ -7,15 +7,23 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"math/rand"
+	"realtor-crm-backend/pkg/event/eventbus"
 )
+
+type ServiceUserDeps struct {
+	UserRepository *RepositoryUser
+	EventBus       *eventbus.BusEvent
+}
 
 type ServiceUser struct {
 	UserRepository *RepositoryUser
+	EventBus       *eventbus.BusEvent
 }
 
-func NewServiceUser(userRepository *RepositoryUser) *ServiceUser {
+func NewServiceUser(deps *ServiceUserDeps) *ServiceUser {
 	return &ServiceUser{
-		UserRepository: userRepository,
+		UserRepository: deps.UserRepository,
+		EventBus:       deps.EventBus,
 	}
 }
 
@@ -58,10 +66,23 @@ func (s *ServiceUser) Create(name, surname, email string, creatorId uint) (strin
 		log.Println(err.Error())
 		return "", errors.New("failed to create user")
 	}
+	data := make(map[string]interface{})
+	newValue := map[string]interface{}{
+		"email":   email,
+		"name":    name,
+		"surname": surname,
+	}
+	data["userId"] = creatorId
+	data["oldValue"] = nil
+	data["newValue"] = newValue
+	go s.EventBus.Publish(eventbus.Event{
+		Type: eventbus.UserCreated,
+		Data: data,
+	})
 	return randomPassword, nil
 }
 
-func (s *ServiceUser) Update(id uint, body UpdateUserRequest) (*User, error) {
+func (s *ServiceUser) Update(id uint, body UpdateUserRequest, creatorId uint) (*User, error) {
 	existedUser, err := s.UserRepository.ById(id)
 	fmt.Println(id)
 	if existedUser == nil {
@@ -80,10 +101,29 @@ func (s *ServiceUser) Update(id uint, body UpdateUserRequest) (*User, error) {
 	if err != nil {
 		return nil, errors.New("failed to update user")
 	}
+	data := make(map[string]interface{})
+	oldValue := map[string]interface{}{
+		"email":   existedUser.Email,
+		"name":    existedUser.Name,
+		"surname": existedUser.Surname,
+	}
+	newValue := map[string]interface{}{
+		"email":   body.Email,
+		"name":    body.Name,
+		"surname": body.Surname,
+	}
+
+	data["userId"] = creatorId
+	data["oldValue"] = oldValue
+	data["newValue"] = newValue
+	go s.EventBus.Publish(eventbus.Event{
+		Type: eventbus.UserUpdated,
+		Data: data,
+	})
 	return user, nil
 }
 
-func (s *ServiceUser) Delete(id uint) error {
+func (s *ServiceUser) Delete(id, creatorId uint) error {
 	_, err := s.UserRepository.ById(id)
 	if err != nil {
 		return errors.New("user not found")
@@ -92,6 +132,17 @@ func (s *ServiceUser) Delete(id uint) error {
 	if err != nil {
 		return errors.New("failed to delete user")
 	}
+	data := make(map[string]interface{})
+	newValue := map[string]interface{}{
+		"deletedId": id,
+	}
+	data["userId"] = creatorId
+	data["oldValue"] = nil
+	data["newValue"] = newValue
+	go s.EventBus.Publish(eventbus.Event{
+		Type: eventbus.UserUpdated,
+		Data: data,
+	})
 	return nil
 }
 

@@ -101,7 +101,12 @@ func (h *HandlerUser) Update() http.HandlerFunc {
 			res.Json(w, http.StatusInternalServerError, "something went wrong")
 			return
 		}
-		user, err := h.UserService.Update(uint(id), *body)
+		creatorId, ok := r.Context().Value(middleware.ContextIdKey).(uint)
+		if !ok {
+			res.Json(w, http.StatusInternalServerError, "something went wrong")
+			return
+		}
+		user, err := h.UserService.Update(uint(id), *body, creatorId)
 		if err != nil {
 			res.Json(w, http.StatusBadRequest, err.Error())
 			return
@@ -119,7 +124,12 @@ func (h *HandlerUser) Delete() http.HandlerFunc {
 			res.Json(w, http.StatusInternalServerError, "something went wrong")
 			return
 		}
-		err = h.UserService.Delete(uint(id))
+		creatorId, ok := r.Context().Value(middleware.ContextIdKey).(uint)
+		if !ok {
+			res.Json(w, http.StatusInternalServerError, "something went wrong")
+			return
+		}
+		err = h.UserService.Delete(uint(id), creatorId)
 		if err != nil {
 			res.Json(w, http.StatusInternalServerError, err.Error())
 			return
