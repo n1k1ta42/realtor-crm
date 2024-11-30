@@ -14,17 +14,19 @@ type User struct {
 	Surname        string          `json:"surname"`
 	Email          string          `json:"email" gorm:"uniqueIndex"`
 	PasswordHash   string          `json:"passwordHash"`
+	Role           string          `json:"role" gorm:"default:'worker'"`
 	Clients        []client.Client `json:"clients" gorm:"constraints:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Objects        []object.Object `json:"objects" gorm:"constraints:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Deals          []deal.Deal     `json:"deals" gorm:"constraints:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
-func NewUser(name, surname, email, password string, organizationsId uint) *User {
+func NewUser(name, surname, email, role, password string, organizationsId uint) *User {
 	return &User{
 		OrganizationId: organizationsId,
 		Name:           name,
 		Surname:        surname,
 		Email:          email,
 		PasswordHash:   password,
+		Role:           role,
 	}
 }

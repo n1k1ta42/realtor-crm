@@ -26,11 +26,28 @@ func NewHandlerUsers(router *http.ServeMux, deps HandlerUserDeps) {
 		UserRepository: deps.UserRepository,
 		UserService:    deps.UserService,
 	}
+	router.Handle("GET /user/profile", middleware.IsAuthed(handler.Profile(), deps.Config))
 	router.Handle("GET /user/list", middleware.IsAuthed(handler.List(), deps.Config))
 	router.Handle("GET /user/{email}", middleware.IsAuthed(handler.ByEmail(), deps.Config))
 	router.Handle("POST /user", middleware.IsAuthed(handler.Create(), deps.Config))
 	router.Handle("PATCH /user/{id}", middleware.IsAuthed(handler.Update(), deps.Config))
 	router.Handle("DELETE /user/{id}", middleware.IsAuthed(handler.Delete(), deps.Config))
+}
+
+func (h *HandlerUser) Profile() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userId, ok := r.Context().Value(middleware.ContextIdKey).(uint)
+		if !ok {
+			res.Json(w, http.StatusInternalServerError, "something went wrong")
+			return
+		}
+		profile, err := h.UserRepository.ById(userId)
+		if err != nil {
+			res.Json(w, http.StatusNotFound, "user not found")
+			return
+		}
+		res.Json(w, http.StatusOK, profile)
+	}
 }
 
 func (h *HandlerUser) List() http.HandlerFunc {
@@ -79,7 +96,7 @@ func (h *HandlerUser) Create() http.HandlerFunc {
 			res.Json(w, http.StatusInternalServerError, "something went wrong")
 			return
 		}
-		createdPassword, err := h.UserService.Create(body.Name, body.Surname, body.Email, creatorId)
+		createdPassword, err := h.UserService.Create(body.Name, body.Surname, body.Email, body.Role, creatorId)
 		if err != nil {
 			res.Json(w, http.StatusBadRequest, err.Error())
 			return
