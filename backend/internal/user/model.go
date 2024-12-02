@@ -13,8 +13,9 @@ type User struct {
 	Name           string          `json:"name"`
 	Surname        string          `json:"surname"`
 	Email          string          `json:"email" gorm:"uniqueIndex"`
-	PasswordHash   string          `json:"passwordHash"`
+	PasswordHash   string          `json:"-"`
 	Role           string          `json:"role" gorm:"default:'worker'"`
+	Avatar         string          `json:"avatar"`
 	Clients        []client.Client `json:"clients" gorm:"constraints:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Objects        []object.Object `json:"objects" gorm:"constraints:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Deals          []deal.Deal     `json:"deals" gorm:"constraints:OnUpdate:CASCADE,OnDelete:SET NULL;"`

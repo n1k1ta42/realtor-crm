@@ -11,6 +11,7 @@ type UpdateUserRequest struct {
 	Name    string `json:"name"`
 	Surname string `json:"surname"`
 	Email   string `json:"email" validate:"omitempty,email"`
+	Avatar  string `json:"avatar"`
 }
 
 type ListUserResponse struct {

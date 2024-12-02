@@ -97,6 +97,7 @@ func (s *ServiceUser) Update(id uint, body UpdateUserRequest, creatorId uint) (*
 		Name:    body.Name,
 		Surname: body.Surname,
 		Email:   body.Email,
+		Avatar:  body.Avatar,
 	})
 	if err != nil {
 		return nil, errors.New("failed to update user")
