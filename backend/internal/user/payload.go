@@ -1,10 +1,11 @@
 package user
 
 type CreateUserRequest struct {
-	Name    string `json:"name" validate:"required,min=2"`
-	Surname string `json:"surname" validate:"required,min=2"`
-	Email   string `json:"email" validate:"required,email"`
-	Role    string `json:"role" validate:"required,eq=worker|eq=admin|eq=director"`
+	Name           string `json:"name" validate:"required,min=2"`
+	Surname        string `json:"surname" validate:"required,min=2"`
+	Email          string `json:"email" validate:"required,email"`
+	Role           string `json:"role" validate:"required,eq=worker|eq=admin|eq=director"`
+	OrganizationId uint   `json:"organizationId" validate:"required"`
 }
 
 type UpdateUserRequest struct {

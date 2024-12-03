@@ -26,12 +26,12 @@ func NewHandlerUsers(router *http.ServeMux, deps HandlerUserDeps) {
 		UserRepository: deps.UserRepository,
 		UserService:    deps.UserService,
 	}
-	router.Handle("GET /user/profile", middleware.IsAuthed(handler.Profile(), deps.Config))
-	router.Handle("GET /user/list", middleware.IsAuthed(handler.List(), deps.Config))
-	router.Handle("GET /user/{email}", middleware.IsAuthed(handler.ByEmail(), deps.Config))
-	router.Handle("POST /user", middleware.IsAuthed(handler.Create(), deps.Config))
-	router.Handle("PATCH /user/{id}", middleware.IsAuthed(handler.Update(), deps.Config))
-	router.Handle("DELETE /user/{id}", middleware.IsAuthed(handler.Delete(), deps.Config))
+	router.Handle("GET /user/profile", middleware.IsAuthed(middleware.Rbac(handler.Profile(), []string{"admin"}), deps.Config))
+	router.Handle("GET /user/list", middleware.IsAuthed(middleware.Rbac(handler.List(), []string{"admin"}), deps.Config))
+	router.Handle("GET /user/{email}", middleware.IsAuthed(middleware.Rbac(handler.ByEmail(), []string{"admin"}), deps.Config))
+	router.Handle("POST /user", middleware.IsAuthed(middleware.Rbac(handler.Create(), []string{"admin"}), deps.Config))
+	router.Handle("PATCH /user/{id}", middleware.IsAuthed(middleware.Rbac(handler.Update(), []string{"admin"}), deps.Config))
+	router.Handle("DELETE /user/{id}", middleware.IsAuthed(middleware.Rbac(handler.Delete(), []string{"admin"}), deps.Config))
 }
 
 func (h *HandlerUser) Profile() http.HandlerFunc {
@@ -108,7 +108,7 @@ func (h *HandlerUser) Create() http.HandlerFunc {
 			res.Json(w, http.StatusInternalServerError, "something went wrong")
 			return
 		}
-		createdPassword, err := h.UserService.Create(body.Name, body.Surname, body.Email, body.Role, creatorId)
+		createdPassword, err := h.UserService.Create(body.Name, body.Surname, body.Email, body.Role, creatorId, body.OrganizationId)
 		if err != nil {
 			res.Json(w, http.StatusBadRequest, err.Error())
 			return

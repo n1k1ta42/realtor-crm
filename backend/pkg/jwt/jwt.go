@@ -11,7 +11,8 @@ type JWT struct {
 }
 
 type DataJWT struct {
-	Id uint
+	Id   uint
+	Role string
 }
 
 func NewJWT(secret string) *JWT {
@@ -22,7 +23,8 @@ func NewJWT(secret string) *JWT {
 
 func (j *JWT) CreateToken(data DataJWT) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": data.Id,
+		"id":   data.Id,
+		"role": data.Role,
 	})
 	s, err := token.SignedString([]byte(j.Secret))
 	if err != nil {
@@ -44,5 +46,10 @@ func (j *JWT) VerifyToken(tokenString string) (bool, *DataJWT) {
 		return false, nil
 	}
 	uintId := uint(id)
-	return parse.Valid, &DataJWT{Id: uintId}
+	role, ok := parse.Claims.(jwt.MapClaims)["role"].(string)
+	if !ok {
+		log.Println("invalid role")
+		return false, nil
+	}
+	return parse.Valid, &DataJWT{Id: uintId, Role: role}
 }
