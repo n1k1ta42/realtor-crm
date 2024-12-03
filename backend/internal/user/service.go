@@ -27,8 +27,8 @@ func NewServiceUser(deps *ServiceUserDeps) *ServiceUser {
 	}
 }
 
-func (s *ServiceUser) List(limit, offset int) (*ListUserResponse, error) {
-	users, err := s.UserRepository.GetUsers(limit, offset)
+func (s *ServiceUser) List(limit, offset, organizationId int, orderBy, direction string) (*ListUserResponse, error) {
+	users, err := s.UserRepository.GetUsers(limit, offset, organizationId, orderBy, direction)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, errors.New("something went wrong")
@@ -52,7 +52,6 @@ func (s *ServiceUser) Create(name, surname, email, role string, creatorId uint) 
 	creator, err := s.UserRepository.ById(creatorId)
 	if err != nil {
 		log.Println(err.Error())
-		//return "", errors.New("not found creator")
 	}
 	randomPassword, err := GenerateRandomPassword()
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(randomPassword), bcrypt.DefaultCost)

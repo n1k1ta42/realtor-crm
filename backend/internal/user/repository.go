@@ -1,6 +1,7 @@
 package user
 
 import (
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"realtor-crm-backend/pkg/db"
 )
@@ -15,15 +16,19 @@ func NewRepositoryUser(database *db.Db) *RepositoryUser {
 	}
 }
 
-func (r *RepositoryUser) GetUsers(limit, offset int) ([]User, error) {
+func (r *RepositoryUser) GetUsers(limit, offset, organizationId int, orderBy, direction string) ([]User, error) {
 	var users []User
-	result := r.Database.DB.
+	query := r.Database.DB.Table("users").
 		Preload("Clients").
 		Preload("Objects").
 		Preload("Deals").
-		Table("users").
 		Where("deleted_at IS NULL").
-		Order("id desc").
+		Session(&gorm.Session{})
+	if organizationId != 0 {
+		query = query.Where("organization_id = ?", organizationId)
+	}
+	result := query.
+		Order(orderBy + " " + direction).
 		Limit(limit).
 		Offset(offset).
 		Find(&users)
