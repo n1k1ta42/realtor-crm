@@ -7,8 +7,9 @@ export interface User {
   name: string
   surname: string
   role: string
+  avatar: string
   organizationId: number
-  clients: Array<string> | null
-  deals: Array<string> | null
-  objects: Array<string> | null
+  clients: string[] | null
+  deals: string[] | null
+  objects: string[] | null
 }

@@ -6,5 +6,7 @@ export const Route = createLazyFileRoute('/_auth/clients/')({
 })
 
 function RouteComponent() {
-  return <Layout links={[{ href: '/clients', label: 'Клиенты' }]}></Layout>
+  return (
+    <Layout links={[{ href: '/clients', label: 'Клиенты' }]}>lorem2000</Layout>
+  )
 }

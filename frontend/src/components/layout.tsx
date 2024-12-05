@@ -7,6 +7,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { ScrollArea } from '@/components/ui/scroll-area.tsx'
 import { Separator } from '@/components/ui/separator'
 import {
   SidebarInset,
@@ -21,7 +22,7 @@ type Link = {
   label: string
 }
 type Props = {
-  links: Array<Link>
+  links: Link[]
 } & PropsWithChildren
 
 export function Layout({ children, links }: Props) {
@@ -54,7 +55,9 @@ export function Layout({ children, links }: Props) {
             </div>
           </div>
         </header>
-        <div className='p-4 pt-0'>{children}</div>
+        <ScrollArea className='h-[calc(100vh-64px)] w-full p-4'>
+          {children}
+        </ScrollArea>
       </SidebarInset>
     </SidebarProvider>
   )

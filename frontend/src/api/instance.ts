@@ -1,7 +1,7 @@
 import { KEY } from '@/auth.tsx'
 import axios from 'axios'
 
-export const API_URL = 'http://localhost:8080'
+export const API_URL = import.meta.env.VITE_API_URL
 
 export const instance = axios.create({
   baseURL: API_URL,

@@ -42,7 +42,6 @@ function LoginComponent() {
   const isLoading = useRouterState({ select: s => s.isLoading })
   const navigate = Route.useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
-
   const search = Route.useSearch()
 
   const onFormSubmit = async (evt: FormEvent<HTMLFormElement>) => {
@@ -66,7 +65,7 @@ function LoginComponent() {
       }, 0)
     } catch (error) {
       if (error instanceof AxiosError) {
-        if (error.response?.status === 401) {
+        if (error.response?.status === 400) {
           toast.error('Неверный логин или пароль')
           return
         }
