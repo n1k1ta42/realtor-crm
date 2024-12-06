@@ -86,7 +86,7 @@ export const AddUser = ({ organizations }: Props) => {
 
   const saveUserMutation = useMutation({
     mutationFn: async (value: Form) => {
-      return await api.user.create(value)
+      return api.user.create(value)
     },
     onSuccess: data => {
       setPassword(data)

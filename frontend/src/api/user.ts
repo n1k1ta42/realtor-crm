@@ -7,6 +7,7 @@ export const user = {
 
     return response.data
   },
+
   getList: async (params: {
     limit: number
     offset: number
@@ -20,6 +21,13 @@ export const user = {
 
     return response.data
   },
+
+  getById: async (id: string): Promise<User> => {
+    const response = await instance.get(`/user/${id}`)
+
+    return response.data
+  },
+
   create: async (body: {
     name: string
     surname: string
@@ -28,6 +36,19 @@ export const user = {
     organizationId: number
   }): Promise<string> => {
     const response = await instance.post('/user', body)
+
+    return response.data
+  },
+
+  edit: async (
+    id: number,
+    body: {
+      name?: string
+      surname?: string
+      email?: string
+    },
+  ): Promise<string> => {
+    const response = await instance.patch(`/user/${id}`, body)
 
     return response.data
   },
