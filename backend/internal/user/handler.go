@@ -28,7 +28,7 @@ func NewHandlerUsers(router *http.ServeMux, deps HandlerUserDeps) {
 	}
 	router.Handle("GET /user/profile", middleware.IsAuthed(middleware.Rbac(handler.Profile(), []string{"admin"}), deps.Config))
 	router.Handle("GET /user/list", middleware.IsAuthed(middleware.Rbac(handler.List(), []string{"admin"}), deps.Config))
-	router.Handle("GET /user/{email}", middleware.IsAuthed(middleware.Rbac(handler.ByEmail(), []string{"admin"}), deps.Config))
+	router.Handle("GET /user/{id}", middleware.IsAuthed(middleware.Rbac(handler.ById(), []string{"admin"}), deps.Config))
 	router.Handle("POST /user", middleware.IsAuthed(middleware.Rbac(handler.Create(), []string{"admin"}), deps.Config))
 	router.Handle("PATCH /user/{id}", middleware.IsAuthed(middleware.Rbac(handler.Update(), []string{"admin"}), deps.Config))
 	router.Handle("DELETE /user/{id}", middleware.IsAuthed(middleware.Rbac(handler.Delete(), []string{"admin"}), deps.Config))
@@ -85,10 +85,16 @@ func (h *HandlerUser) List() http.HandlerFunc {
 	}
 }
 
-func (h *HandlerUser) ByEmail() http.HandlerFunc {
+func (h *HandlerUser) ById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		email := r.PathValue("email")
-		user, err := h.UserRepository.ByEmail(email)
+		idString := r.PathValue("id")
+		id, err := strconv.ParseUint(idString, 10, 64)
+		if err != nil {
+			log.Println(err.Error())
+			res.Json(w, http.StatusInternalServerError, "something went wrong")
+			return
+		}
+		user, err := h.UserRepository.ById(uint(id))
 		if err != nil {
 			res.Json(w, http.StatusNotFound, "user not found")
 			return
