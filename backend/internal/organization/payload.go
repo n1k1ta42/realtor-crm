@@ -10,8 +10,8 @@ type CreateOrganizationRequest struct {
 type UpdateOrganizationRequest struct {
 	Name    string `json:"name"`
 	Address string `json:"address"`
+	Email   string `json:"email" validate:"omitempty,email"`
 	Phone   string `json:"phone"`
-	Email   string `json:"email" validate:"email"`
 }
 
 type ListOrganizationResponse struct {

@@ -48,8 +48,8 @@ func (s *ServiceOrganization) Create(name, address, phone, email string) (*Organ
 }
 
 func (s *ServiceOrganization) Update(id uint, body UpdateOrganizationRequest) (*Organization, error) {
-	existedUser, err := s.OrganizationRepository.ById(id)
-	if existedUser == nil {
+	existedOrganization, err := s.OrganizationRepository.ById(id)
+	if existedOrganization == nil {
 		return nil, errors.New("organization not found")
 	}
 	if err != nil {
