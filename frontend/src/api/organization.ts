@@ -14,4 +14,10 @@ export const organization = {
 
     return response.data
   },
+
+  getById: async (id: string): Promise<Organization> => {
+    const response = await instance.get(`/organization/${id}`)
+
+    return response.data
+  },
 }
