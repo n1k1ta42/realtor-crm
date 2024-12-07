@@ -47,7 +47,15 @@ func (h *HandlerOrganization) List() http.HandlerFunc {
 			res.Json(w, http.StatusBadRequest, "invalid offset")
 			return
 		}
-		list, err := h.OrganizationService.List(limit, offset)
+		orderBy := r.URL.Query().Get("orderBy")
+		if orderBy == "" {
+			orderBy = "name"
+		}
+		direction := r.URL.Query().Get("direction")
+		if direction == "" {
+			direction = "asc"
+		}
+		list, err := h.OrganizationService.List(limit, offset, orderBy, direction)
 		if err != nil {
 			res.Json(w, http.StatusInternalServerError, err.Error())
 			return

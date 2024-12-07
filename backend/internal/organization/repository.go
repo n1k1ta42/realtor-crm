@@ -15,13 +15,13 @@ func NewRepositoryOrganization(database *db.Db) *RepositoryOrganization {
 	}
 }
 
-func (r *RepositoryOrganization) GetOrganizations(limit, offset int) ([]Organization, error) {
+func (r *RepositoryOrganization) GetOrganizations(limit, offset int, orderBy, direction string) ([]Organization, error) {
 	var organizations []Organization
 	result := r.Database.DB.
 		Preload("Users").
 		Table("organizations").
 		Where("deleted_at IS NULL").
-		Order("id desc").
+		Order(orderBy + " " + direction).
 		Limit(limit).
 		Offset(offset).
 		Find(&organizations)
@@ -45,7 +45,9 @@ func (r *RepositoryOrganization) GetOrganizationsCount() (int64, error) {
 
 func (r *RepositoryOrganization) ById(id uint) (*Organization, error) {
 	var organization Organization
-	result := r.Database.DB.First(&organization, id)
+	result := r.Database.DB.
+		Preload("Users").
+		First(&organization, id)
 	if result.Error != nil {
 		return nil, result.Error
 	}

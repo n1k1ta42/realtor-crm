@@ -16,8 +16,8 @@ func NewServiceOrganization(organizationRepository *RepositoryOrganization) *Ser
 	}
 }
 
-func (s *ServiceOrganization) List(limit, offset int) (*ListOrganizationResponse, error) {
-	organizations, err := s.OrganizationRepository.GetOrganizations(limit, offset)
+func (s *ServiceOrganization) List(limit, offset int, orderBy, direction string) (*ListOrganizationResponse, error) {
+	organizations, err := s.OrganizationRepository.GetOrganizations(limit, offset, orderBy, direction)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, errors.New("something went wrong")
