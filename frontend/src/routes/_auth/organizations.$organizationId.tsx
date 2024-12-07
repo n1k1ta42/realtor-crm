@@ -1,6 +1,15 @@
 import { Layout } from '@/components/layout.tsx'
+import { Button } from '@/components/ui/button.tsx'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx'
 import { queryClient } from '@/main.tsx'
+import { DeleteOrganization } from '@/modules/organizations/DeleteOrganization.tsx'
+import { EditOrganization } from '@/modules/organizations/EditOrganization.tsx'
 import { organizationByIdQueryOptions } from '@/queryOptions/organizationByIdQueryOptions.tsx'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
@@ -8,13 +17,16 @@ import {
   ErrorComponent,
   ErrorComponentProps,
 } from '@tanstack/react-router'
+import { CopyIcon } from 'lucide-react'
+import { toast } from 'sonner'
+import { useCopyToClipboard } from 'usehooks-ts'
 
 export const Route = createFileRoute('/_auth/organizations/$organizationId')({
   component: RouteComponent,
   pendingComponent: () => (
     <Layout links={[]}>
       <div className='space-y-4'>
-        <Skeleton className='h-[210px] w-full' />
+        <Skeleton className='h-[162px] w-full' />
       </div>
     </Layout>
   ),
@@ -32,10 +44,19 @@ export function PostErrorComponent({ error }: ErrorComponentProps) {
 
 function RouteComponent() {
   const id = Route.useParams().organizationId
+  const [, setCopy] = useCopyToClipboard()
 
   const { data: organization } = useSuspenseQuery(
     organizationByIdQueryOptions(id),
   )
+
+  const handleCopy = () => {
+    toast.promise(setCopy(organization.email), {
+      loading: 'Копирование',
+      success: 'Email скопирован',
+      error: 'Ошибка копирования',
+    })
+  }
 
   return (
     <Layout
@@ -47,65 +68,47 @@ function RouteComponent() {
         },
       ]}
     >
-      {/*<div className="space-y-4">*/}
-      {/*  <Card>*/}
-      {/*    <CardHeader>*/}
-      {/*      <CardTitle className="flex items-start justify-between">*/}
-      {/*        <div className="flex items-center space-x-4">*/}
-      {/*          <Avatar className="h-20 w-20 rounded-full">*/}
-      {/*            <AvatarImage*/}
-      {/*              className="object-cover"*/}
-      {/*              src={user.avatar}*/}
-      {/*              alt={`${user.name} ${user.surname}`}*/}
-      {/*            />*/}
-      {/*            <AvatarFallback className="rounded-lg">*/}
-      {/*              {user.name[0].toLocaleUpperCase()}*/}
-      {/*              {user.surname[0].toLocaleUpperCase()}*/}
-      {/*            </AvatarFallback>*/}
-      {/*          </Avatar>*/}
-      {/*        </div>*/}
-      {/*        <div className="space-x-2">*/}
-      {/*          <EditUser id={user.ID} />*/}
-      {/*          <DeleteUser id={user.ID} />*/}
-      {/*        </div>*/}
-      {/*      </CardTitle>*/}
-      {/*    </CardHeader>*/}
-      {/*    <CardContent className="flex gap-8">*/}
-      {/*      <div className="flex flex-col justify-between border-r-2 pr-8">*/}
-      {/*        <div className="text-sm text-muted-foreground">ФИО:</div>*/}
-      {/*        <div className="flex items-center space-x-2">*/}
-      {/*          <div>*/}
-      {/*            {user.name} {user.surname}*/}
-      {/*          </div>*/}
-      {/*        </div>*/}
-      {/*      </div>*/}
-      {/*      <div className="flex flex-col justify-between border-r-2 pr-8">*/}
-      {/*        <div className="text-sm text-muted-foreground">Должность:</div>*/}
-      {/*        <div className="flex items-center space-x-2">*/}
-      {/*          <div>{user.role}</div>*/}
-      {/*        </div>*/}
-      {/*      </div>*/}
-      {/*      <div className="flex flex-col justify-between border-r-2 pr-8">*/}
-      {/*        <div className="text-sm text-muted-foreground">Email:</div>*/}
-      {/*        <div className="flex items-center space-x-2">*/}
-      {/*          <a*/}
-      {/*            href={'mailto:' + user.email}*/}
-      {/*            className="text-primary underline"*/}
-      {/*          >*/}
-      {/*            {user.email}*/}
-      {/*          </a>*/}
-      {/*          <Button onClick={handleCopy} variant="ghost">*/}
-      {/*            <CopyIcon />*/}
-      {/*          </Button>*/}
-      {/*        </div>*/}
-      {/*      </div>*/}
-      {/*      <div className="flex flex-col justify-between">*/}
-      {/*        <div className="text-sm text-muted-foreground">Организация:</div>*/}
-      {/*        <div>{organization.name}</div>*/}
-      {/*      </div>*/}
-      {/*    </CardContent>*/}
-      {/*  </Card>*/}
-      {/*</div>*/}
+      <div className='space-y-4'>
+        <Card>
+          <CardHeader>
+            <CardTitle className='flex items-start justify-between'>
+              <div className='flex items-center space-x-4'>
+                {organization.name}
+              </div>
+              <div className='space-x-2'>
+                <EditOrganization id={organization.ID} />
+                <DeleteOrganization id={organization.ID} />
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className='flex gap-8'>
+            <div className='flex flex-col justify-between border-r-2 pr-8'>
+              <div className='text-sm text-muted-foreground'>Адрес:</div>
+              <div className='flex items-center space-x-2'>
+                <div>{organization.address}</div>
+              </div>
+            </div>
+            <div className='flex flex-col justify-between border-r-2 pr-8'>
+              <div className='text-sm text-muted-foreground'>Email:</div>
+              <div className='flex items-center space-x-2'>
+                <a
+                  href={'mailto:' + organization.email}
+                  className='text-primary underline'
+                >
+                  {organization.email}
+                </a>
+                <Button onClick={handleCopy} variant='ghost'>
+                  <CopyIcon />
+                </Button>
+              </div>
+            </div>
+            <div className='flex flex-col justify-between'>
+              <div className='text-sm text-muted-foreground'>Телефон:</div>
+              <div>{organization.phone}</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </Layout>
   )
 }

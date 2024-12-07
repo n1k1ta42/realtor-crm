@@ -1,5 +1,6 @@
 import { instance } from '@/api/instance.ts'
 import { Organization } from '@/types/organization.ts'
+import { AxiosResponse } from 'axios'
 
 export const organization = {
   getList: async (params: {
@@ -31,4 +32,20 @@ export const organization = {
 
     return response.data
   },
+
+  edit: async (
+    id: number,
+    body: {
+      name?: string
+      surname?: string
+      email?: string
+    },
+  ): Promise<string> => {
+    const response = await instance.patch(`/organization/${id}`, body)
+
+    return response.data
+  },
+
+  delete: async (id: number): Promise<AxiosResponse<string>> =>
+    instance.delete(`/organization/${id}`),
 }

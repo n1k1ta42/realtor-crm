@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button.tsx'
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card.tsx'
@@ -13,6 +14,7 @@ import { DeleteUser } from '@/modules/users/DeleteUser.tsx'
 import { EditUser } from '@/modules/users/EditUser.tsx'
 import { organizationByIdQueryOptions } from '@/queryOptions/organizationByIdQueryOptions.tsx'
 import { userByIdQueryOptions } from '@/queryOptions/userByIdQueryOptions.tsx'
+import { format } from '@formkit/tempo'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
   createFileRoute,
@@ -29,6 +31,7 @@ export const Route = createFileRoute('/_auth/users/$userId')({
     <Layout links={[]}>
       <div className='space-y-4'>
         <Skeleton className='h-[210px] w-full' />
+        <Skeleton className='h-[90px] w-full' />
       </div>
     </Layout>
   ),
@@ -123,6 +126,14 @@ function RouteComponent() {
               <div>{organization.name}</div>
             </div>
           </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Дата создания</CardTitle>
+            <CardDescription>
+              {format(user.CreatedAt, { date: 'long', time: 'short' })}
+            </CardDescription>
+          </CardHeader>
         </Card>
       </div>
     </Layout>

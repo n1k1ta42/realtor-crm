@@ -1,5 +1,6 @@
 import { instance } from '@/api/instance.ts'
 import { User } from '@/types/user.ts'
+import { AxiosResponse } from 'axios'
 
 export const user = {
   getProfile: async (): Promise<User> => {
@@ -53,15 +54,6 @@ export const user = {
     return response.data
   },
 
-  update: async (
-    id: number,
-    body: {
-      name: string
-      surname: string
-      email: string
-      avatar: string
-    },
-  ): Promise<User> => instance.patch(`/user/${id}`, body),
-
-  delete: async (id: number): Promise<void> => instance.delete(`/user/${id}`),
+  delete: async (id: number): Promise<AxiosResponse<string>> =>
+    instance.delete(`/user/${id}`),
 }
