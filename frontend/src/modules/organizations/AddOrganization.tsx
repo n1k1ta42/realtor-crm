@@ -11,26 +11,16 @@ import {
 } from '@/components/ui/dialog.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { Label } from '@/components/ui/label.tsx'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select.tsx'
-import { Separator } from '@/components/ui/separator.tsx'
-import { userListQueryOptions } from '@/queryOptions/userListQueryOptions.ts'
-import { UserListSearch } from '@/routes/_auth/users.index.tsx'
-import { Organization } from '@/types/organization.ts'
+import { organizationListQueryOptions } from '@/queryOptions/organizationListQueryOptions.ts'
+import { OrganizationListSearch } from '@/routes/_auth/organizations.index.tsx'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
 import { zodValidator } from '@tanstack/zod-form-adapter'
 import { AxiosError } from 'axios'
 import { clsx } from 'clsx'
-import { CopyIcon, PlusIcon } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { useCopyToClipboard } from 'usehooks-ts'
 import { z } from 'zod'
 
 const formSchema = z.object({
@@ -42,9 +32,9 @@ const formSchema = z.object({
       message: 'Обязательное поле',
     })
     .trim(),
-  surname: z
+  address: z
     .string({
-      required_error: 'Введите фамилию',
+      required_error: 'Введите адрес',
     })
     .min(1, {
       message: 'Обязательное поле',
@@ -57,44 +47,34 @@ const formSchema = z.object({
     .email({
       message: 'Введите корректный email',
     }),
-  role: z
+  phone: z
     .string({
-      required_error: 'Введите имя',
+      required_error: 'Введите телефон',
     })
     .min(1, {
       message: 'Обязательное поле',
     })
     .trim(),
-  organizationId: z
-    .number({
-      required_error: 'Выберите организацию',
-    })
-    .finite({
-      message: 'Выберите организацию',
-    }),
 })
-
-type Role = z.infer<typeof formSchema>['role']
 
 type Form = z.infer<typeof formSchema>
 
 type Props = {
-  organizations: Organization[]
-  search: UserListSearch
+  search: OrganizationListSearch
 }
 
-export const AddUser = ({ organizations, search }: Props) => {
-  const [password, setPassword] = useState('')
-  const [, copy] = useCopyToClipboard()
-  const { refetch } = useSuspenseQuery(userListQueryOptions(search))
+export const AddOrganization = ({ search }: Props) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const { refetch } = useSuspenseQuery(organizationListQueryOptions(search))
 
   const saveUserMutation = useMutation({
     mutationFn: async (value: Form) => {
-      return api.user.create(value)
+      return api.organization.create(value)
     },
-    onSuccess: data => {
-      setPassword(data)
-      toast.success('Пользователь успешно создан')
+    onSuccess: () => {
+      toast.success('Организация успешно создан')
+      form.reset()
+      setIsOpen(false)
       refetch()
     },
     onError: error => {
@@ -109,10 +89,9 @@ export const AddUser = ({ organizations, search }: Props) => {
   const form = useForm({
     defaultValues: {
       name: '',
-      surname: '',
+      address: '',
       email: '',
-      role: '',
-      organizationId: Infinity,
+      phone: '',
     },
     validatorAdapter: zodValidator(),
     validators: {
@@ -120,21 +99,20 @@ export const AddUser = ({ organizations, search }: Props) => {
     },
     onSubmit: async ({ value }) => {
       await saveUserMutation.mutateAsync(value)
-      form.reset()
     },
   })
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button>
           <PlusIcon />
-          Добавить пользователя
+          Добавить организацию
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Созадние пользователя</DialogTitle>
+          <DialogTitle>Созадние организации</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
         <form
@@ -151,7 +129,7 @@ export const AddUser = ({ organizations, search }: Props) => {
               children={field => {
                 return (
                   <div className='space-y-1'>
-                    <Label htmlFor={field.name}>Имя:</Label>
+                    <Label htmlFor={field.name}>Название:</Label>
                     <Input
                       className={clsx({
                         ['border-destructive']: field.state.meta.errors.length,
@@ -172,11 +150,11 @@ export const AddUser = ({ organizations, search }: Props) => {
               }}
             />
             <form.Field
-              name='surname'
+              name='address'
               children={field => {
                 return (
                   <div className='space-y-1'>
-                    <Label htmlFor={field.name}>Фамилия:</Label>
+                    <Label htmlFor={field.name}>Адрес:</Label>
                     <Input
                       className={clsx({
                         ['border-destructive']: field.state.meta.errors.length,
@@ -222,76 +200,21 @@ export const AddUser = ({ organizations, search }: Props) => {
               }}
             />
             <form.Field
-              name='role'
+              name='phone'
               children={field => {
                 return (
                   <div className='space-y-1'>
-                    <Label htmlFor={field.name}>Роль:</Label>
-                    <Select
-                      value={field.state.value || ''}
-                      onValueChange={value => field.handleChange(value as Role)}
-                    >
-                      <SelectTrigger
-                        id={field.name}
-                        name={field.name}
-                        onBlur={field.handleBlur}
-                        className={clsx({
-                          ['border-destructive']:
-                            field.state.meta.errors.length,
-                        })}
-                      >
-                        <SelectValue aria-label='Выберите роль' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[
-                          { key: 'admin', value: 'Администратор' },
-                          { key: 'director', value: 'Директор' },
-                          { key: 'worker', value: 'Работник' },
-                        ].map(item => (
-                          <SelectItem key={item.key} value={`${item.key}`}>
-                            {item.value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {field.state.meta.errors.length ? (
-                      <em className='text-xs text-destructive'>
-                        {field.state.meta.errors.join(',')}
-                      </em>
-                    ) : null}
-                  </div>
-                )
-              }}
-            />
-            <form.Field
-              name='organizationId'
-              children={field => {
-                return (
-                  <div className='space-y-1'>
-                    <Label htmlFor={field.name}>Организация:</Label>
-                    <Select
-                      value={field.state.value?.toString() || ''}
-                      onValueChange={value => field.handleChange(+value)}
-                    >
-                      <SelectTrigger
-                        id={field.name}
-                        name={field.name}
-                        onBlur={field.handleBlur}
-                        className={clsx({
-                          ['border-destructive']:
-                            field.state.meta.errors.length,
-                        })}
-                      >
-                        <SelectValue aria-label='Выберите организация' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {organizations.map(o => (
-                          <SelectItem key={o.ID} value={`${o.ID}`}>
-                            {o.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor={field.name}>Телефон:</Label>
+                    <Input
+                      className={clsx({
+                        ['border-destructive']: field.state.meta.errors.length,
+                      })}
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={e => field.handleChange(e.target.value)}
+                    />
                     {field.state.meta.errors.length ? (
                       <em className='text-xs text-destructive'>
                         {field.state.meta.errors.join(',')}
@@ -302,42 +225,6 @@ export const AddUser = ({ organizations, search }: Props) => {
               }}
             />
           </div>
-          {password && (
-            <>
-              <Separator />
-              <div>
-                <p className='text-xs'>
-                  Для пользователя создан случайный пароль.
-                </p>
-                <p className='text-xs'>
-                  Скопируйте и передайте его пользователю
-                </p>
-              </div>
-              <div className='flex items-center space-x-2 text-sm'>
-                <span>Пароль пользователя: </span>
-                <span className='font-bold'>{password}</span>
-                <span
-                  className='cursor-pointer'
-                  onClick={() => {
-                    copy(password)
-                      .then(() =>
-                        toast.success('Пароль скопирован в буфер обмена'),
-                      )
-                      .catch(() =>
-                        toast.error('Что то пошло не так при копировании'),
-                      )
-                  }}
-                >
-                  <CopyIcon
-                    className='hover:text-primary'
-                    width={16}
-                    height={16}
-                  />
-                </span>
-              </div>
-              <Separator />
-            </>
-          )}
           <form.Subscribe
             selector={state => [state.isFormValid, state.isSubmitting]}
             children={([isValid, isSubmitting]) => (
@@ -350,7 +237,6 @@ export const AddUser = ({ organizations, search }: Props) => {
                     variant='secondary'
                     type='button'
                     onClick={() => {
-                      setPassword('')
                       form.reset()
                     }}
                   >

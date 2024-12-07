@@ -17,14 +17,13 @@ import { Route as LoginImport } from './routes/login'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthUsersIndexImport } from './routes/_auth/users.index'
+import { Route as AuthOrganizationsIndexImport } from './routes/_auth/organizations.index'
 import { Route as AuthUsersUserIdImport } from './routes/_auth/users.$userId'
+import { Route as AuthOrganizationsOrganizationIdImport } from './routes/_auth/organizations.$organizationId'
 
 // Create Virtual Routes
 
 const AuthProfileIndexLazyImport = createFileRoute('/_auth/profile/')()
-const AuthOrganizationsIndexLazyImport = createFileRoute(
-  '/_auth/organizations/',
-)()
 const AuthObjectsIndexLazyImport = createFileRoute('/_auth/objects/')()
 const AuthDealsIndexLazyImport = createFileRoute('/_auth/deals/')()
 const AuthClientsIndexLazyImport = createFileRoute('/_auth/clients/')()
@@ -54,16 +53,6 @@ const AuthProfileIndexLazyRoute = AuthProfileIndexLazyImport.update({
   getParentRoute: () => AuthRoute,
 } as any).lazy(() =>
   import('./routes/_auth/profile.index.lazy').then((d) => d.Route),
-)
-
-const AuthOrganizationsIndexLazyRoute = AuthOrganizationsIndexLazyImport.update(
-  {
-    id: '/organizations/',
-    path: '/organizations/',
-    getParentRoute: () => AuthRoute,
-  } as any,
-).lazy(() =>
-  import('./routes/_auth/organizations.index.lazy').then((d) => d.Route),
 )
 
 const AuthObjectsIndexLazyRoute = AuthObjectsIndexLazyImport.update({
@@ -96,11 +85,24 @@ const AuthUsersIndexRoute = AuthUsersIndexImport.update({
   getParentRoute: () => AuthRoute,
 } as any)
 
+const AuthOrganizationsIndexRoute = AuthOrganizationsIndexImport.update({
+  id: '/organizations/',
+  path: '/organizations/',
+  getParentRoute: () => AuthRoute,
+} as any)
+
 const AuthUsersUserIdRoute = AuthUsersUserIdImport.update({
   id: '/users/$userId',
   path: '/users/$userId',
   getParentRoute: () => AuthRoute,
 } as any)
+
+const AuthOrganizationsOrganizationIdRoute =
+  AuthOrganizationsOrganizationIdImport.update({
+    id: '/organizations/$organizationId',
+    path: '/organizations/$organizationId',
+    getParentRoute: () => AuthRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -127,11 +129,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/_auth/organizations/$organizationId': {
+      id: '/_auth/organizations/$organizationId'
+      path: '/organizations/$organizationId'
+      fullPath: '/organizations/$organizationId'
+      preLoaderRoute: typeof AuthOrganizationsOrganizationIdImport
+      parentRoute: typeof AuthImport
+    }
     '/_auth/users/$userId': {
       id: '/_auth/users/$userId'
       path: '/users/$userId'
       fullPath: '/users/$userId'
       preLoaderRoute: typeof AuthUsersUserIdImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/organizations/': {
+      id: '/_auth/organizations/'
+      path: '/organizations'
+      fullPath: '/organizations'
+      preLoaderRoute: typeof AuthOrganizationsIndexImport
       parentRoute: typeof AuthImport
     }
     '/_auth/users/': {
@@ -162,13 +178,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthObjectsIndexLazyImport
       parentRoute: typeof AuthImport
     }
-    '/_auth/organizations/': {
-      id: '/_auth/organizations/'
-      path: '/organizations'
-      fullPath: '/organizations'
-      preLoaderRoute: typeof AuthOrganizationsIndexLazyImport
-      parentRoute: typeof AuthImport
-    }
     '/_auth/profile/': {
       id: '/_auth/profile/'
       path: '/profile'
@@ -182,22 +191,24 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AuthRouteChildren {
+  AuthOrganizationsOrganizationIdRoute: typeof AuthOrganizationsOrganizationIdRoute
   AuthUsersUserIdRoute: typeof AuthUsersUserIdRoute
+  AuthOrganizationsIndexRoute: typeof AuthOrganizationsIndexRoute
   AuthUsersIndexRoute: typeof AuthUsersIndexRoute
   AuthClientsIndexLazyRoute: typeof AuthClientsIndexLazyRoute
   AuthDealsIndexLazyRoute: typeof AuthDealsIndexLazyRoute
   AuthObjectsIndexLazyRoute: typeof AuthObjectsIndexLazyRoute
-  AuthOrganizationsIndexLazyRoute: typeof AuthOrganizationsIndexLazyRoute
   AuthProfileIndexLazyRoute: typeof AuthProfileIndexLazyRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthOrganizationsOrganizationIdRoute: AuthOrganizationsOrganizationIdRoute,
   AuthUsersUserIdRoute: AuthUsersUserIdRoute,
+  AuthOrganizationsIndexRoute: AuthOrganizationsIndexRoute,
   AuthUsersIndexRoute: AuthUsersIndexRoute,
   AuthClientsIndexLazyRoute: AuthClientsIndexLazyRoute,
   AuthDealsIndexLazyRoute: AuthDealsIndexLazyRoute,
   AuthObjectsIndexLazyRoute: AuthObjectsIndexLazyRoute,
-  AuthOrganizationsIndexLazyRoute: AuthOrganizationsIndexLazyRoute,
   AuthProfileIndexLazyRoute: AuthProfileIndexLazyRoute,
 }
 
@@ -207,12 +218,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
+  '/organizations/$organizationId': typeof AuthOrganizationsOrganizationIdRoute
   '/users/$userId': typeof AuthUsersUserIdRoute
+  '/organizations': typeof AuthOrganizationsIndexRoute
   '/users': typeof AuthUsersIndexRoute
   '/clients': typeof AuthClientsIndexLazyRoute
   '/deals': typeof AuthDealsIndexLazyRoute
   '/objects': typeof AuthObjectsIndexLazyRoute
-  '/organizations': typeof AuthOrganizationsIndexLazyRoute
   '/profile': typeof AuthProfileIndexLazyRoute
 }
 
@@ -220,12 +232,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
+  '/organizations/$organizationId': typeof AuthOrganizationsOrganizationIdRoute
   '/users/$userId': typeof AuthUsersUserIdRoute
+  '/organizations': typeof AuthOrganizationsIndexRoute
   '/users': typeof AuthUsersIndexRoute
   '/clients': typeof AuthClientsIndexLazyRoute
   '/deals': typeof AuthDealsIndexLazyRoute
   '/objects': typeof AuthObjectsIndexLazyRoute
-  '/organizations': typeof AuthOrganizationsIndexLazyRoute
   '/profile': typeof AuthProfileIndexLazyRoute
 }
 
@@ -234,12 +247,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
+  '/_auth/organizations/$organizationId': typeof AuthOrganizationsOrganizationIdRoute
   '/_auth/users/$userId': typeof AuthUsersUserIdRoute
+  '/_auth/organizations/': typeof AuthOrganizationsIndexRoute
   '/_auth/users/': typeof AuthUsersIndexRoute
   '/_auth/clients/': typeof AuthClientsIndexLazyRoute
   '/_auth/deals/': typeof AuthDealsIndexLazyRoute
   '/_auth/objects/': typeof AuthObjectsIndexLazyRoute
-  '/_auth/organizations/': typeof AuthOrganizationsIndexLazyRoute
   '/_auth/profile/': typeof AuthProfileIndexLazyRoute
 }
 
@@ -249,36 +263,39 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/login'
+    | '/organizations/$organizationId'
     | '/users/$userId'
+    | '/organizations'
     | '/users'
     | '/clients'
     | '/deals'
     | '/objects'
-    | '/organizations'
     | '/profile'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | ''
     | '/login'
+    | '/organizations/$organizationId'
     | '/users/$userId'
+    | '/organizations'
     | '/users'
     | '/clients'
     | '/deals'
     | '/objects'
-    | '/organizations'
     | '/profile'
   id:
     | '__root__'
     | '/'
     | '/_auth'
     | '/login'
+    | '/_auth/organizations/$organizationId'
     | '/_auth/users/$userId'
+    | '/_auth/organizations/'
     | '/_auth/users/'
     | '/_auth/clients/'
     | '/_auth/deals/'
     | '/_auth/objects/'
-    | '/_auth/organizations/'
     | '/_auth/profile/'
   fileRoutesById: FileRoutesById
 }
@@ -316,20 +333,29 @@ export const routeTree = rootRoute
     "/_auth": {
       "filePath": "_auth.tsx",
       "children": [
+        "/_auth/organizations/$organizationId",
         "/_auth/users/$userId",
+        "/_auth/organizations/",
         "/_auth/users/",
         "/_auth/clients/",
         "/_auth/deals/",
         "/_auth/objects/",
-        "/_auth/organizations/",
         "/_auth/profile/"
       ]
     },
     "/login": {
       "filePath": "login.tsx"
     },
+    "/_auth/organizations/$organizationId": {
+      "filePath": "_auth/organizations.$organizationId.tsx",
+      "parent": "/_auth"
+    },
     "/_auth/users/$userId": {
       "filePath": "_auth/users.$userId.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/organizations/": {
+      "filePath": "_auth/organizations.index.tsx",
       "parent": "/_auth"
     },
     "/_auth/users/": {
@@ -346,10 +372,6 @@ export const routeTree = rootRoute
     },
     "/_auth/objects/": {
       "filePath": "_auth/objects.index.lazy.tsx",
-      "parent": "/_auth"
-    },
-    "/_auth/organizations/": {
-      "filePath": "_auth/organizations.index.lazy.tsx",
       "parent": "/_auth"
     },
     "/_auth/profile/": {

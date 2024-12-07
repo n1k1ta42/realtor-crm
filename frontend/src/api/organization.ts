@@ -20,4 +20,15 @@ export const organization = {
 
     return response.data
   },
+
+  create: async (body: {
+    name: string
+    address: string
+    email: string
+    phone: string
+  }): Promise<string> => {
+    const response = await instance.post('/organization', body)
+
+    return response.data
+  },
 }

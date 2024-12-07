@@ -69,7 +69,10 @@ function RouteComponent() {
             organizations={queryOrganizations.data.organizations}
             search={search}
           />
-          <AddUser organizations={queryOrganizations.data.organizations} />
+          <AddUser
+            search={search}
+            organizations={queryOrganizations.data.organizations}
+          />
         </div>
         <ScrollArea className='h-[calc(100vh-208px)]'>
           <List

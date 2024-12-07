@@ -10,6 +10,7 @@ import {
 import { UserListSearch } from '@/routes/_auth/users.index.tsx'
 import { Organization } from '@/types/organization.ts'
 import { User } from '@/types/user.ts'
+import { format } from '@formkit/tempo'
 import { useNavigate } from '@tanstack/react-router'
 import {
   createColumnHelper,
@@ -46,6 +47,7 @@ export const List = ({ users, search, organizations }: Props) => {
       },
     })
   }
+
   const columns = [
     columnHelper.accessor(row => row.avatar, {
       id: 'avatar',
@@ -90,6 +92,14 @@ export const List = ({ users, search, organizations }: Props) => {
         <i>{organizations.find(o => o.ID === info.getValue())?.name}</i>
       ),
       header: () => <span>Органиция</span>,
+      enableSorting: false,
+    }),
+    columnHelper.accessor(row => row.CreatedAt, {
+      id: 'CreatedAt',
+      cell: info => (
+        <i>{format(info.getValue(), { date: 'medium', time: 'short' })}</i>
+      ),
+      header: () => <span>Дата создания</span>,
       enableSorting: false,
     }),
     columnHelper.accessor(row => row.clients, {
