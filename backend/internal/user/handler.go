@@ -26,7 +26,7 @@ func NewHandlerUsers(router *http.ServeMux, deps HandlerUserDeps) {
 		UserRepository: deps.UserRepository,
 		UserService:    deps.UserService,
 	}
-	router.Handle("GET /user/profile", middleware.IsAuthed(middleware.Rbac(handler.Profile(), []string{"admin"}), deps.Config))
+	router.Handle("GET /user/profile", middleware.IsAuthed(handler.Profile(), deps.Config))
 	router.Handle("GET /user/list", middleware.IsAuthed(middleware.Rbac(handler.List(), []string{"admin"}), deps.Config))
 	router.Handle("GET /user/{id}", middleware.IsAuthed(middleware.Rbac(handler.ById(), []string{"admin"}), deps.Config))
 	router.Handle("POST /user", middleware.IsAuthed(middleware.Rbac(handler.Create(), []string{"admin"}), deps.Config))

@@ -26,11 +26,11 @@ func NewHandlerOrganizations(router *http.ServeMux, deps HandlerOrganizationDeps
 		OrganizationRepository: deps.OrganizationRepository,
 		OrganizationService:    deps.OrganizationService,
 	}
-	router.Handle("GET /organization/list", middleware.IsAuthed(handler.List(), deps.Config))
-	router.Handle("GET /organization/{id}", middleware.IsAuthed(handler.ById(), deps.Config))
-	router.Handle("POST /organization", middleware.IsAuthed(handler.Create(), deps.Config))
-	router.Handle("PATCH /organization/{id}", middleware.IsAuthed(handler.Update(), deps.Config))
-	router.Handle("DELETE /organization/{id}", middleware.IsAuthed(handler.Delete(), deps.Config))
+	router.Handle("GET /organization/list", middleware.IsAuthed(middleware.Rbac(handler.List(), []string{"admin"}), deps.Config))
+	router.Handle("GET /organization/{id}", middleware.IsAuthed(middleware.Rbac(handler.ById(), []string{"admin"}), deps.Config))
+	router.Handle("POST /organization", middleware.IsAuthed(middleware.Rbac(handler.Create(), []string{"admin"}), deps.Config))
+	router.Handle("PATCH /organization/{id}", middleware.IsAuthed(middleware.Rbac(handler.Update(), []string{"admin"}), deps.Config))
+	router.Handle("DELETE /organization/{id}", middleware.IsAuthed(middleware.Rbac(handler.Delete(), []string{"admin"}), deps.Config))
 }
 
 func (h *HandlerOrganization) List() http.HandlerFunc {
